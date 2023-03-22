@@ -316,7 +316,17 @@ consensus_info
 
 ``` r
 # I've provided screenshots for the comparison to MAX in the class_exercise_results folder. They look like they generally align!
+
+knitr::include_graphics("MAX_Browser1.png")
 ```
+
+<img src="MAX_Browser1.png" width="2328" />
+
+``` r
+knitr::include_graphics("MAX_Browser2.png")
+```
+
+<img src="MAX_Browser2.png" width="2245" />
 
 # Now I am going to determine how my peaks for each protein overlap annotations of the genome
 

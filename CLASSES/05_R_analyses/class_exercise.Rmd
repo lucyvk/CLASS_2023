@@ -115,6 +115,9 @@ consensus_info
 
 # I've provided screenshots for the comparison to MAX in the class_exercise_results folder. They look like they generally align!
 
+knitr::include_graphics("MAX_Browser1.png")
+knitr::include_graphics("MAX_Browser2.png")
+
 ```
 
 
