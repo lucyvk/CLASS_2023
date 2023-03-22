@@ -89,7 +89,7 @@ I have some set up to test in the data folder.
 ```{R find overlaps}
 
 # setting file path to peak files
-basepath <- "/scratch/Shares/rinnclass/CLASS_2023/<your_folder>"
+basepath <- "/scratch/Shares/rinnclass/CLASS_2023/lucyvk"
 path <- "CLASS_2023/CLASSES/03_Nextflow/00_Pol2_NF_CORE_RUN/results/bwa/mergedLibrary/macs/broadPeak"
 
 # first we read the peak files in as gRanges object with rtracklayer function.
@@ -155,6 +155,10 @@ crazy_ovf <- findOverlaps(crazy_peaks1, crazy_peaks2)
 length(crazy_peaks1)
 length(crazy_peaks2)
 summary(crazy_ovf)
+
+crazy_ovf2 <- findOverlaps(crazy_peaks2, crazy_peaks1)
+summary(crazy_ovf2)
+
 # What?? 11042 overlaps but there were only 10,255 peaks in crazy_peaks1
 ```
 

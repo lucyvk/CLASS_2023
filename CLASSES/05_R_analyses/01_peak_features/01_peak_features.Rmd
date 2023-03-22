@@ -15,7 +15,7 @@ library(GenomicRanges)
 source("../../../util/my_class_functions.R")
 
 # filepath to import peaks
-basepath <- "/scratch/Shares/rinnclass/CLASS_2023/JR"
+basepath <- "/scratch/Shares/rinnclass/CLASS_2023/lucyvk"
 peak_path <- "CLASS_2023/CLASSES/05_R_analyses/00_consensus_peaks/consensus_peaks"
 consensusPeakPath <- file.path(basepath, peak_path)
 ```
@@ -55,7 +55,7 @@ consensus_peaks <- lapply(consensus_peaks_files, rtracklayer::import)
 
 # adding DBP name to each list of GRanges from the file name
 # note gsub requires no space around or argument ( | )
-names(consensus_peaks) <- gsub("/scratch/Shares/rinnclass/CLASS_2023/JR/CLASS_2023/CLASSES/05_R_analyses/00_consensus_peaks/consensus_peaks/|_consensus.bed","", consensus_peaks_files)
+names(consensus_peaks) <- gsub("/scratch/Shares/rinnclass/CLASS_2023/lucyvk/CLASS_2023/CLASSES/05_R_analyses/00_consensus_peaks/consensus_peaks/|.bed","", consensus_peaks_files)
 
 ```
 
@@ -100,7 +100,7 @@ This loads in much faster and can be made into readable dataframe pretty easily.
 # let's see what this will be like moving forward !
 
 ```{R GRanges Genes to DF} 
-# starting annotation file that we will use moving forward.
+# starting annotation file that we will use moving forward. -- all faster than loading from gencode each time 
 lncrna_mrna_genes <- rtracklayer::import("results/gene_annotations/mrna_lncrna_genes.gtf")
 
 # Nice that loaded so much faster -- lets see as DF
@@ -114,11 +114,11 @@ Now let's make a promoter annotation file and gene_body for future use.
 ?promoters
 
 # creating and exporting promoter annotations
+# Note that you can play with the size of promoters.. 
 lncrna_mrna_promoters <- promoters(lncrna_mrna_genes, upstream = 1000, downstream = 1000)
 # check right size
-width(lncrna_mrna_promoters)
+width(lncrna_mrna_promoters) # should all be upstream + downstream 
 rtracklayer::export(lncrna_mrna_promoters, "results/gene_annotations/lncrna_mrna_promoters.gtf")
-
 
 # last handy annotation will be lncRNA and mRNA gene IDs to subset
 lncrna_gene_ids <- mrna_lncrna_genes$gene_id[mrna_lncrna_genes$gene_type == "lncRNA"]
@@ -217,7 +217,7 @@ num_peaks_df$peaks_overlapping_mrna_genebody <-
 
 # let's take a look.
 # cool lots of info let's save:
-write_csv(num_peaks_df, "num_peaks_df.csv")
+write_csv(num_peaks_df, "results/num_peaks_df.csv")
 
 ```
 

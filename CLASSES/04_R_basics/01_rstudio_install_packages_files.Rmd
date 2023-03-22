@@ -56,6 +56,11 @@ Now we will use Install.packages() for most packages. This will install any pack
 ```{R install packages}
 ?install.packages
 install.packages("tidyverse")
+
+# special version
+packageurl <- "https://github.com/tidyverse/tidyverse/archive/refs/tags/v1.3.1.tar.gz"
+install.packages(packageurl, repos=NULL, type="source")
+
 ```
 Cool we have our first package installed.
 
@@ -69,7 +74,7 @@ Let's now install genomic ranges package we will be using for most of class
 # note we will have two classes on "Iranges" and Granges before we use GenomicRanges package
 ```{R install genomic ranges}
 # Here is an example BiocManager::install
-BiocManager::install("GenomicRanges")
+BiocManager::install("GenomicRanges",dependencies = TRUE, INSTALL_opts = '--no-lock')
 # try installing all the packages listed below.
 # note use either install.packages or BiocManager::install
 ```
@@ -111,17 +116,17 @@ Exercise : install packages needed for class
 
 # probably worth reading what they do while installing...
 
-Iranges
-ggplot2
-broom
-Gviz
-ggdendro
-ggrepel
-pheatmap
-httr
-janitor
-purrr
-deseq2
+install.packages("Iranges") # x
+install.packages("ggplot2") # x
+install.packages("broom") # x
+install.packages("Gviz") # x 
+install.packages("ggdendro") # x
+install.packages("ggrepel")
+install.packages("pheatmap")
+install.packages("httr")
+install.packages("janitor")
+install.packages("purrr")
+install.packages("deseq2")
 
 # let's try this one -- maybe tricky:
 ggpubr

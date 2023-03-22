@@ -21,7 +21,7 @@ We will use read_tsv to load in a peak file that is in tab separated format (tsv
 ```{bash}
 
 # The Peak files are located in our 03 nextflow folder -- let's take a look:
-cd /scratch/Shares/rinnclass/CLASS_2023/<your_folder>/CLASS_2023/CLASSES/03_Nextflow/00_Pol2_NF_CORE_RUN/results/bwa/mergedLibrary/macs/broadPeak
+cd /scratch/Shares/rinnclass/CLASS_2023/lucyvk/CLASS_2023/CLASSES/03_Nextflow/00_Pol2_NF_CORE_RUN/results/bwa/mergedLibrary/macs/broadPeak
 
 # We see a lot of different types of peak files and we want .braodPeak Let's load one in 
 
@@ -34,10 +34,10 @@ Since that is a lot of path typing each time let's shorten it my using file.path
 
 # we will first need to set an object name to load into the environment (what we are calling this file.path)
 # we assign it the values in the file using the assignment opperator " <- " 
-basepath <- "/scratch/Shares/rinnclass/CLASS_2023/<your_folder>"
+basepath <- "/scratch/Shares/rinnclass/CLASS_2023/lucyvk"
 
 # we can then add the rest of the path as such:
-Pol2_peak1 <- read_tsv(file.path(basepath, " rest of file path"))
+Pol2_peak1 <- read_tsv(file.path(basepath, "whatever"))
 
 
 # now we can read in the peak file using file.path() function , rest of path
@@ -59,7 +59,7 @@ Solution: figure out more about read_tsv
 ?read_tsv
 
 # cool so there is a col_names = F we can use -- let's try it.
-Pol2_peak1 <- read_tsv("/scratch/Shares/rinnclass/CLASS_2023/JR/CLASS_2023/CLASSES/03_Nextflow/00_Pol2_NF_CORE_RUN/results/bwa/mergedLibrary/macs/broadPeak/POLR2A_R1_peaks.broadPeak", col_names = F)
+Pol2_peak1 <- read_tsv("/scratch/Shares/rinnclass/CLASS_2023/lucyvk/CLASS_2023/CLASSES/03_Nextflow/00_Pol2_NF_CORE_RUN/results/bwa/mergedLibrary/macs/broadPeak/POLR2A_R1_peaks.broadPeak", col_names = F)
 
 # Nice so now we have X1-X9 as col names
 ```
@@ -104,6 +104,7 @@ Cool so now we have a nice organized column names.
 # We are going to first use some "indexing" we will do this A LOT !!
 # we keep same object name, we use that object to index using []
 
+# Narrow down to just the chromosomes 
 Pol2_peak1 <- Pol2_peak1[Pol2_peak1$chromosome %in% c(paste0("chr", 1:22), "chrM", "chrX", "chrY"),]
 
 # Note we have an empty , at the end -- this is because R reads as rows, cols 
@@ -243,6 +244,13 @@ ggplot(aes(x = peak_width, y = qValue)) +
 
 # Interesting, we see that the smaller the peak the lower the qValue tends to be 
 
+# first pipe in the dataframe to GGplot
+Pol2_peak1 %>%
+  # set the aes(x= , y= ) 
+ggplot(aes(x = score, y = qValue)) +
+  # + tells ggplot to add another aspect to plot (points)
+  geom_point()
+
 ```
 
 ##################################################
@@ -262,6 +270,7 @@ Exercise: compare properties of other replicates
 ##################################################
 
 # Do the same as above for the replicates of your groups ChIPseq
+
 
 
 

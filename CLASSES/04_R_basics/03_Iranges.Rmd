@@ -12,7 +12,7 @@ knitr::opts_chunk$set(echo = TRUE)
 options(stringsAsFactors = F)
 library(tidyverse)
 library(IRanges)
-# library(GenomicRanges)
+library(GenomicRanges)
 # library(Gviz)
 ```
 Accompanying Youtube Vidoe: 

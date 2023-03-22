@@ -13,11 +13,11 @@ options(stringsAsFactors = F)
 library(GenomicRanges)
 library(tidyverse)
 library(IRanges)
-source("../../../util/my_class_functions.R")
+source("../../../util/new_class_functions.R")
 
 # filepath to import peaks
-basepath <- "/scratch/Shares/rinnclass/CLASS_2023/<your_folder>"
-peak_path <- "CLASS_2023/CLASSES/03_Nextflow/00_my_chipseq/results/bwa/mergedLibrary/macs/broadPeak/"
+basepath <- "/scratch/Shares/rinnclass/CLASS_2023/chipseqprofs"
+peak_path <- "results/bwa/mergedLibrary/macs/broadPeak_good_files/"
 broadpeakfilepath <- file.path(basepath, peak_path)
 ```
 Acompanying youtube video:
@@ -53,7 +53,7 @@ peak_num <- peak_num %>%
   # peak_num <- separate(peak_num, col = dbp,  into = c('dbp', 'replicate'), sep = "_")
 
 # let's save this for our records 
-write_csv(peak_num, "results/num_peaks_df.csv")
+write_csv(peak_num, "num_peaks_df.csv")
 
 # cool our first results file !
 ```
@@ -61,7 +61,7 @@ write_csv(peak_num, "results/num_peaks_df.csv")
 # STEP2: create consensus peaks
 ```{r create consensus peaks}
 # first we need a list of unique dbps as input parameter
-dbp <- c("EP300", ...)
+# dbp <- c("EP300", ...)
 # works but real pain for 480 dbps later :)
 
 # or use our handy previous code 
@@ -88,7 +88,7 @@ num_consensus_peaks <- sapply(consensus_list, length) %>%
 peak_num <- left_join(peak_num, num_consensus_peaks)
 
 # saving 
-write_csv(peak_num, "results/num_peaks_df.csv")
+write_csv(peak_num, "num_peaks_df.csv")
 
 ```
 
@@ -98,7 +98,7 @@ Let's use "analysis/00_consensus_peaks/
 
 ```{r exporting consensus peaks }
 # setting file path to export
-basepath <- "/scratch/Shares/rinnclass/CLASS_2023/<your_folder>"
+basepath <- "/scratch/Shares/rinnclass/CLASS_2023/lucyvk"
 consensus_path <- "CLASS_2023/CLASSES/05_R_analyses/00_consensus_peaks/"
 exportpath <- file.path(basepath, consensus_path)
 
@@ -109,8 +109,8 @@ for(i in 1:length(consensus_list)) {
 rtracklayer::export(consensus_list[[i]], paste0(exportpath, names(consensus_list)[i], "_consensus_peaks.bed") )}
 
 # alternative local export:
-for(i in 1:length(consensus_list)) {
-rtracklayer::export(consensus_list[[i]], paste0("results/consensus_peaks/", names(consensus_list)[i],"_consensus_peaks.bed")) }
+# for(i in 1:length(consensus_list)) {
+# rtracklayer::export(consensus_list[[i]], paste0("results/consensus_peaks/", names(consensus_list)[i],"_consensus_peaks.bed")) }
 
 ```
 
@@ -120,7 +120,7 @@ Now let's read in one of these files and see what we see:
 
 ```{r reading .bed file from rtracklayer_export}
 # read in a given peak file 
-peak_1 <- read_tsv("EP300_consensus_peaks.bed", col_names = F)
+peak_1 <- read_tsv("MAX_consensus_peaks.bed", col_names = F)
 
 # ok we can see that rtracklayer did not keep qvalue sigvalue etc
 # we also see the odd contings etc.
@@ -131,7 +131,7 @@ peak_1 <- read_tsv("EP300_consensus_peaks.bed", col_names = F)
 Rtracklayer export does not keep the col names :( 
 ```{r reading .bed file from rtracklayer_export}
 # FIRST a file list:
-consensus_file_list <- list.files("/scratch/Shares/rinnclass/CLASS_2023/JR/CLASS_2023/CLASSES/05_R_analyses/00_consensus_peaks", full.names = T, pattern = ".bed")
+consensus_file_list <- list.files("/scratch/Shares/rinnclass/CLASS_2023/lucyvk/CLASS_2023/CLASSES/05_R_analyses/00_consensus_peaks", full.names = T, pattern = ".bed")
 
 # lapply (for loop) across consensus file list to add colnames
 # The actual col names for .broadPeak are: chr, start, end, name, score, strand
@@ -152,7 +152,7 @@ peaks <- lapply(peaks, function(x) x %>% filter(chr %in% canonical_chr))
 
 
 # now that these are all nice and clean let's export:
-new_filenames <- paste0("consensus_peaks/", names(peaks), "_consensus.bed")
+new_filenames <- paste0(names(peaks), "_consensus.bed")
 
 for(i in 1:length(peaks)) {
   write.table(peaks[[i]], new_filenames[[i]],
@@ -183,7 +183,7 @@ headers <- paste0("track type=bedGraph name=", names(peaks))
 headers
 
 # creating a path to export after we add header in for loop below
-new_filenames <- paste0("ucsc_consensus_peaks/", names(peaks), ".bed")
+new_filenames <- paste0("./consensus_peaks/",names(peaks), ".bed")
 new_filenames
 ```
 
