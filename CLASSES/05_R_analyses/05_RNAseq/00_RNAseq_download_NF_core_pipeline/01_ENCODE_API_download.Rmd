@@ -160,7 +160,7 @@ encode_file_info <- function(experiment_accession,
                              base_url = "https://www.encodeproject.org/report.tsv?",
                              file_format = "fastq",
                              type = "File",
-                             status = "released",
+                             status = "released", # Note that one of the experiments was "revoked" so this filters that 
                              fields = c("accession", "read_count", "md5sum",
                                         "controlled_by", "paired_end",
                                         "paired_with", "replicate", "target")) {
@@ -244,6 +244,8 @@ You can download these files directly and file transfer - or right click and wge
 ```{bash}
 
 # Let's download the RNAseq fastq files into a new dir called "fastq"
+
+# RUN THIS STUFF IN BASH!!!
 
 # Now we need to copy files.txt into a new dir called "fastq"
 mkdir fastq

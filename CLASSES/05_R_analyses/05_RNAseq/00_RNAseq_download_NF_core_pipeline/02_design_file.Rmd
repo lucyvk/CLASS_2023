@@ -65,6 +65,8 @@ hist(map_example[[1]])
 # another one
 map_example[[2]]
 
+hist(map_example[[2]])
+
 # indexing to the first component of map vector
 map_example[[1]][[1]]
 
@@ -343,7 +345,7 @@ Let's create a sample column using mutate -- and we'll clean up the names
 
 ```{r creating design file}
 # adding path to fastq files so NF_CORE knows where to get them
-base_path <- "/scratch/Shares/rinnclass/CLASS_2023/JR"
+base_path <- "/scratch/Shares/rinnclass/CLASS_2023/lucyvk"
 fastq_path <- "CLASS_2023/CLASSES/05_R_analyses/05_RNAseq/00_RNAseq_download_NF_core_pipeline/data/fastq2/"
 final_path <- c(file.path(base_path, fastq_path))
 

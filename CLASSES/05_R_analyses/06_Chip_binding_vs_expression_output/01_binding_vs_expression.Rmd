@@ -14,7 +14,15 @@ library(tidyverse)
 library(GenomicRanges)
 source("../../../util/intersect_functions.R")
 source("../../../util/_setup.R")
-#library(ggpubr)
+
+install.packages("https://cran.r-project.org/src/contrib/Archive/nloptr/nloptr_1.2.2.2.tar.gz", repos=NULL, type="source")
+install.packages("numDeriv")
+
+# this one failed:
+install.packages("https://cran.r-project.org/src/contrib/Archive/pbkrtest/pbkrtest_0.5-0.1.tar.gz", repos=NULL,type="source")
+
+install.packages("ggpubr")
+library(ggpubr)
 ```
 
 Today we are going to be comparing how binding relates to expression output.
@@ -102,9 +110,10 @@ how many DBPs are bound at each promoter
 
 ```{r loading in peak features data frame }
 
+# I don't have this file saved but the object is loaded in with the chip seq peak features loading
 # peak_occurence_df is loaded in our environment and contains how many DBPs bind to each promoter (rows)
-peak_occurence_df <- read_csv("../01_peak_features/results/peak_occurence_df.csv")
-View(peak_occurence_df)
+# peak_occurence_df <- read_csv("../01_peak_features/results/peak_occurence_df.csv")
+# View(peak_occurence_df)
 
 # Now we can merge in the TPM data to this data.frame
 # This will merge on the on teh gene_id column

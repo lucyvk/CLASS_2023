@@ -14,7 +14,7 @@ library(GenomicRanges)
 library(ggplot2)
 library(rtracklayer)
 library(tidyverse)
-library(ComplexHeatmap)
+#library(ComplexHeatmap) # don't install because need to update dependencies - we'll just use line plots 
 library(circlize)
 source("../../../util/my_class_functions.R")
 source("../../../util/_setup.R")
@@ -50,26 +50,28 @@ profile_tss is the same as the code we ran in 01_metaplots.Rmd.
 Let's see how handy this function is now!
 ```{r individual meta plots}
 
-# HEP300
-plot(profile_tss(consensus_peaks[["EP300"]], lncrna_mrna_promoters))
+# MAX
+plot(profile_tss(consensus_peaks[["MAX"]], lncrna_mrna_promoters))
 
-# H3K27me3
-plot(profile_tss(consensus_peaks[["H3K27me3"]], lncrna_mrna_promoters))
+# 
+plot(profile_tss(consensus_peaks[["BRCA1"]], lncrna_mrna_promoters))
 
 # H3K36me3
 plot(profile_tss(consensus_peaks[["H3K36me3"]], lncrna_mrna_promoters))
 
 # H3K4me3
-plot(profile_tss(consensus_peaks[["H3K4me3"]], lncrna_mrna_promoters))
+plot(profile_tss(consensus_peaks[["JUN"]], lncrna_mrna_promoters))
 
 # HDAC2
-plot(profile_tss(consensus_peaks[["HDAC2"]], lncrna_mrna_promoters))
+plot(profile_tss(consensus_peaks[["POLR2A"]], lncrna_mrna_promoters))
 
 # RCOR1
-plot(profile_tss(consensus_peaks[["RCOR1"]], lncrna_mrna_promoters))
+plot(profile_tss(consensus_peaks[["TBP"]], lncrna_mrna_promoters))
 
 # REST
-plot(profile_tss(consensus_peaks[["REST"]], lncrna_mrna_promoters))
+plot(profile_tss(consensus_peaks[["POLR2AphosphoS2"]], lncrna_mrna_promoters))
+
+plot(profile_tss(consensus_peaks[["POLR2AphosphoS5"]], lncrna_mrna_promoters))
 
 
 ```
@@ -134,7 +136,7 @@ metaplot_filtered_matrix <- metaplot_df %>%
 table(rowSums(is.na(metaplot_filtered_matrix)))
 
 # If there are any NAs Let's filter out those is.na
-# metaplot_filtered_matrix <- metaplot_filtered_matrix[rowSums(is.na(metaplot_filtered_matrix)) == 0,]
+metaplot_filtered_matrix <- metaplot_filtered_matrix[rowSums(is.na(metaplot_filtered_matrix)) == 0,]
 
 # Z-Scale the rows for clustering (not needed for profile plots)
 mm_scaled <- t(scale(t(metaplot_filtered_matrix)))

@@ -71,7 +71,7 @@ In order to calculate what the peak coverage across each promoter is we'll conve
 ?coverage
 
 # creating a coverage object for HDAC2 ChIPseq consensus peaks
-peak_coverage <- coverage(consensus_peaks[["HDAC2"]]) 
+peak_coverage <- coverage(consensus_peaks[["MAX"]]) 
 
 
 View(peak_coverage)
@@ -160,7 +160,7 @@ We will also find where conesnsus ChIPseq peaks overlap the promoters windows.
 Kind of like doing find overlaps for GRanges and Views is doing this to an integerRangeList.
 ```{r reducing data to jsut Iranges of promters and peak coverage }
 
-# let's look at views
+# let's look at views - for working with run-length encoded peaks 
 ?Views
 # ok so Views can store and access all the promoter vectors
 # We will end up with an index of all 'promoter windows' and peak ranges
@@ -202,6 +202,7 @@ promoter_peak_view
 promoter_peak_matrix <- do.call("rbind", promoter_peak_view)
 # good to note in a matrix sometimes to use do.call and "rbind"
 
+# 
 dim(promoter_peak_matrix)
 # now we have a matrix of nrow_promoters by 6,000 cols
 
@@ -280,12 +281,12 @@ This plot is pretty basic, so let's add some more meangingful legends and a titl
 ggplot(metaplot_df, aes(x = x, y = dens)) + 
   geom_vline(xintercept = 0, lty = 2) + 
   geom_line(size = 1.5) + 
-  ggtitle("HDAC2 Promoter Metaplot") + 
+  ggtitle("MAX Promoter Metaplot") + 
   scale_x_continuous(breaks = c(-3000, 0, 3000),
                      labels = c("-1kb", "TSS", "+1kb"),
                      name = "") + 
   ylab("Peak frequency")
-ggsave("figures/HDAC2_promoter_metaplot.pdf")
+ggsave("figures/MAX_promoter_metaplot.pdf")
 ```
 
 ###############################
