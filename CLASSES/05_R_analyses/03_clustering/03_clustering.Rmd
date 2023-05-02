@@ -14,7 +14,7 @@ library(tidyverse)
 library(ggdendro)
 library(GenomicRanges)
 
-# install.packages(pheatmap)
+install.packages("pheatmap")
 library(pheatmap)
 
 ```
@@ -304,7 +304,6 @@ promoter_dbps <- promoter_peak_occurence_matrix %>%
   rownames_to_column("dbp") %>%
 # here we just made a column that has the DBP name
 # currently it is a "meta" name
-   
    # LET'S DISCUSS PIVOT WIDER and SHORTER - IT'S IMPORTANT
    # takes col 2: all the rest of cols (col 1 is dbp name)
    # now each DBP will have 30,000+ rows for values in all promoters

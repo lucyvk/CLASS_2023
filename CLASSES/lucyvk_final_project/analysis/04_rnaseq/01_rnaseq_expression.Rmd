@@ -1,0 +1,298 @@
+---
+title: "01_rnaseq_expression"
+author: "lucyvk"
+date: "4/26/2023"
+output: html_document
+editor_options: 
+  chunk_output_type: console
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+options(stringsAsFactors = F)
+library(tidyverse)
+library(GenomicRanges)
+source("../../../../util/intersect_functions.R")
+source("../../../../util/_setup.R")
+library(ggpubr)
+```
+
+# load in chipseq data from analysis/01_peak_feautres
+
+```{r loading in chipseq data}
+load("../01_consensus_peaks/results/peak_features.RData", verbose = T)
+
+```
+
+Next we want to load in our final_samplesheet from 01_DESEQ_counts.Rmd
+# Reading in sample sheet
+
+```{r read in sample_sheet}
+# First let's read in the sample sheet to know what is what
+samplesheet <- read_rds("../../../05_R_analyses/05_RNAseq/01_differential_expression/results/final_samplesheet.rds")
+```
+
+# reading in TPM values from Salmon for our analyses
+
+```{r reading in salmon Salmon TPMs}
+
+# reading in salmon tpm
+salmon_tpm <- read.csv("../../../05_R_analyses/05_RNAseq/00_RNAseq_download_NF_core_pipeline/00_NF_CORE_RNAseq_Pipeline_run/results/salmon/salmon_merged_gene_tpm.csv")
+
+# TPM table is in same order as samplesheet
+tpm <- salmon_tpm %>% 
+  pivot_longer(cols = 2:ncol(.), names_to = "sample_id", values_to = "tpm") %>%
+  merge(samplesheet) %>%
+  group_by(gene_id, condition) %>%
+  summarize(tpm = mean(tpm, na.rm = T)) %>%
+  pivot_wider(names_from = condition, values_from = tpm, names_prefix = "tpm_")
+
+# Save this table so I can re-load 
+write_rds(tpm, "results/tpm.rds")
+
+# This will merge on the on teh gene_id column
+promoter_features_df <- merge(peak_occurence_df, tpm)
+
+# saving this file
+write.csv(promoter_features_df, "results/promoter_features_df.csv")
+
+```
+
+
+# Abundance of genes in each cellular fraction
+
+```{r TPM of genes in each fraction}
+# First we need to the tpm DF into a matrix
+
+tpm <- readRDS("results/tpm.rds")
+
+tpm_matrix <- tpm %>% 
+  column_to_rownames("gene_id") %>%
+  as.matrix()
+tpm_scaled <- t(scale(t(tpm_matrix)))
+tpm_scaled <- tpm_scaled[complete.cases(tpm_scaled),]
+
+
+# WARNING TAKES 5 min
+# plotting
+new.env()
+pdf("figures/heatmap_expression.pdf", height =49, width = 12)
+pheatmap::pheatmap(tpm_scaled, show_rownames = FALSE)
+graphics.off()
+
+```
+RESULT: 
+(1) Most RNAs are abundant in the nucleus
+(2) Some RNAs expressed in total that are not in other fractions
+
+
+# Plotting binding versus expression
+
+Now let's examine how binding effects expression.
+We have published previously that the more binding
+events at a promoter the more abundant the expression is.
+Let's see if this holds for our current subset of DBPs
+```{r DBP promoter binding versus total RNA expression}
+
+ggplot(promoter_features_df, 
+            aes(y = log2(tpm_homo_sapiens_hepg2 + 0.001), x = number_of_dbp, color = gene_type)) + 
+geom_point(data = promoter_features_df %>% filter(tpm_homo_sapiens_hepg2 > 0.001),
+             shape = 17, alpha = 0.7) +
+  
+  # Adding a generative additive model 
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = "cs")) +
+  # this adds the statistics from the gam to the figure
+  stat_cor() +
+  geom_smooth(method = "lm") +
+  # this is just to make it look nice.
+  scale_x_continuous(expand = c(0,0)) +
+  # adding colors manually
+  scale_color_manual(values = c("#a8404c", "#424242"), name = "Gene type") + 
+  # title
+  ggtitle("Expression vs. promoter binding events") + 
+  # labeling axes
+  xlab(expression('Number of TFs')) +
+  ylab(expression(log[2](TPM))) 
+
+ggsave("figures/binding_vs_expression_total_rna.pdf")
+
+```
+Result: 
+(1) There is a linear trend with number of DBPS and expression levels
+(2) There is a population of genes that have numerous DBPs with low expression
+
+# Binding versus nuclear expression
+Let's see if the binding versus expression holds in the nuclear fraction
+```{r binding versus nuclear expression}
+
+# Now let's make a similar plot for nuclear RNA abundance versus #DBPs bound to their promoter
+ggplot(promoter_features_df, 
+            aes(y = log2(tpm_homo_sapiens_nuclear_fraction + 0.001), x = number_of_dbp, color = gene_type)) + 
+  geom_point(data = promoter_features_df %>% filter(tpm_homo_sapiens_nuclear_fraction > 0.001),
+             shape = 17, alpha = 0.7) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = "cs")) +
+  stat_cor() +
+  scale_x_continuous(expand = c(0,0)) +
+  scale_color_manual(values = c("#a8404c", "#424242"), name = "Gene type") + 
+  ggtitle("Nuclear Expression vs. promoter binding events") + 
+  xlab(expression('Number of TFs')) +
+  ylab(expression(log[2](TPM))) 
+  
+# saving figure
+ggsave("figures/nuclear_expression-vs-promoter_binding.pdf")
+```
+RESULT: looks very similar to total RNA binding versus expression
+
+
+# Binding versus cytoplasmic expression
+
+Next we will determine the DBP binding versus cytoplasmic expression
+```{Binding versus cytoplasmic expression}
+
+# Same thing just seeing if there is a difference of cyto RNAs versus DBPs on promoter
+ggplot(promoter_features_df, 
+            aes(y = log2(tpm_homo_sapiens_cytosolic_fraction + 0.001), x = number_of_dbp, color = gene_type)) + 
+            # note if we take off the log2 everything is very lowly expressed
+  geom_point(data = promoter_features_df %>% filter(tpm_homo_sapiens_cytosolic_fraction > 0.001),
+             shape = 17, alpha = 0.7) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = "cs")) +
+  stat_cor() +
+  scale_x_continuous(expand = c(0,0)) +
+  scale_color_manual(values = c("#a8404c", "#424242"), name = "Gene type") + 
+  ggtitle("Cytoplasmic Expression vs. promoter binding events") + 
+  xlab(expression('Number of TFs')) +
+  ylab(expression(log[2](TPM))) 
+
+
+ggsave("figures/cytoplasmic_expression-vs-promoter_binding.pdf")
+  
+```
+RESULTS:
+(1) everything seems to be low abundance 
+(2) Some mRNAs are expressed in the nucleus -- we could look at this more later.
+(3) The same linear trend holds but is driven by mostly low expression events.
+
+# lncRNA versus mRNA expression in total RNA
+Next we will directly test the lncRNA vs mRNA expression levels in total RNA. 
+
+```{r determining lncRNA and mRNA expression levels in total RNA}
+
+# the main function here is color by gene_type in promoter_features_df
+ggplot(promoter_features_df, aes(x = log2(tpm_homo_sapiens_hepg2 + 0.01), color = gene_type))+
+  geom_density()
+
+# saving figure
+ggsave("figures/mrna_lncrna_tpm_total_rna.pdf")
+
+# let's also do the same for nuclear since lncRNAs are typically more nuclear
+ggplot(promoter_features_df, aes(x = log2(tpm_homo_sapiens_nuclear_fraction + 0.01), color = gene_type))+
+  geom_density()
+
+# saving figure
+ggsave("figures/mrna_lncrna_tpm_nuclear.pdf")
+
+```
+RESULT:
+(1) This yet again confirms lncRNAs have lower expression levels than mRNAs.
+(2) In the nuclear fraction it shift's to closer.
+(3) lot's of mRNA with nuclear expression -- that seems odd
+
+Let's see if our results comparing binding vs. expression differ when separating by super binders
+```{r super binder binding vs. expression}
+
+ggplot(promoter_features_df, 
+            aes(y = log2(tpm_homo_sapiens_hepg2 + 0.001), x = number_of_dbp, color = super_binder)) + 
+geom_point(data = promoter_features_df %>% filter(tpm_homo_sapiens_hepg2 > 0.001),
+             shape = 17, alpha = 0.7) +
+  
+  # Adding a generative additive model 
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = "cs")) +
+  # this adds the statistics from the gam to the figure
+  stat_cor() +
+  geom_smooth(method = "lm") +
+  # this is just to make it look nice.
+  scale_x_continuous(expand = c(0,0)) +
+  # adding colors manually
+  scale_color_manual(values = c("#a8404c", "#424242"), name = "Super Binder") + 
+  # title
+  ggtitle("Expression vs. promoter binding events (split by super binder)") + 
+  # labeling axes
+  xlab(expression('Number of TFs')) +
+  ylab(expression(log[2](TPM))) 
+
+ggsave("figures/binding_vs_expression_total_rna_super.pdf")
+
+```
+Result - If we look at the trend for only the super promoters, it is linear but less steep than the trend for the lower binding promoters. There are still a large number of super binders with low expression. 
+
+Let's zoom in on only the super binders and look at mRNA vs. lncRNA - the cases with low expression here are potentially interesting.
+```{r}
+
+zoomed_df <- promoter_features_df[promoter_features_df$super_binder == "super binder",]
+
+ggplot(zoomed_df, 
+            aes(y = log2(tpm_homo_sapiens_hepg2 + 0.001), x = number_of_dbp, color = gene_type)) + 
+geom_point(data = zoomed_df %>% filter(tpm_homo_sapiens_hepg2 > 0.001),
+             shape = 17, alpha = 0.7) +
+  
+  # Adding a generative additive model 
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = "cs")) +
+  # this adds the statistics from the gam to the figure
+  stat_cor() +
+  geom_smooth(method = "lm") +
+  # this is just to make it look nice.
+  scale_x_continuous(expand = c(0,0)) +
+  # adding colors manually
+  scale_color_manual(values = c("#a8404c", "#424242"), name = "Gene type") + 
+  # title
+  ggtitle("Expression vs. promoter binding events (zoomed in on super binders)") + 
+  # labeling axes
+  xlab(expression('Number of TFs')) +
+  ylab(expression(log[2](TPM))) 
+
+ggsave("figures/binding_vs_expression_total_rna_zoomed.pdf")
+
+```
+Result - mRNA super binders have higher expression levels, but also pretty large variance in expression levels, and many of the cases with low expression are in mRNA super binders. The trend between binding and expression is very similar between lncRNA and mRNA super binders.
+
+We can do the same looking at only nuclear expression
+```{r nuclear expression by super binder}
+
+# Now let's make a similar plot for nuclear RNA abundance versus #DBPs bound to their promoter
+ggplot(promoter_features_df, 
+            aes(y = log2(tpm_homo_sapiens_nuclear_fraction + 0.001), x = number_of_dbp, color = super_binder)) + 
+  geom_point(data = promoter_features_df %>% filter(tpm_homo_sapiens_nuclear_fraction > 0.001),
+             shape = 17, alpha = 0.7) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = "cs")) +
+  stat_cor() +
+  scale_x_continuous(expand = c(0,0)) +
+  scale_color_manual(values = c("#a8404c", "#424242"), name = "Super binder") + 
+  ggtitle("Nuclear Expression vs. promoter binding events (separated by super binder)") + 
+  xlab(expression('Number of TFs')) +
+  ylab(expression(log[2](TPM))) 
+  
+# saving figure
+ggsave("figures/nuclear_expression-vs-promoter_binding_super.pdf")
+```
+Result: The result for nuclear expression looks very similar to the overall result.
+```{r Binding versus cytoplasmic expression, separated by super binders}
+
+# Same thing just seeing if there is a difference of cyto RNAs versus DBPs on promoter
+ggplot(promoter_features_df, 
+            aes(y = log2(tpm_homo_sapiens_cytosolic_fraction + 0.001), x = number_of_dbp, color = super_binder)) + 
+            # note if we take off the log2 everything is very lowly expressed
+  geom_point(data = promoter_features_df %>% filter(tpm_homo_sapiens_cytosolic_fraction > 0.001),
+             shape = 17, alpha = 0.7) +
+  geom_smooth(method = 'gam', formula = y ~ s(x, bs = "cs")) +
+  stat_cor() +
+  scale_x_continuous(expand = c(0,0)) +
+  scale_color_manual(values = c("#a8404c", "#424242"), name = "Gene type") + 
+  ggtitle("Cytoplasmic Expression vs. promoter binding events") + 
+  xlab(expression('Number of TFs')) +
+  ylab(expression(log[2](TPM))) 
+
+
+ggsave("figures/cytoplasmic_expression-vs-promoter_binding_super.pdf")
+
+```
+The trends are similar for super binders vs. not super binders, and not as strong. There are overall many cases where there is low expression with high expression outliers in both super binders and non super binders. 

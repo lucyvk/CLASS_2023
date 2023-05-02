@@ -10,15 +10,27 @@ editor_options:
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 options(stringsAsFactors = FALSE)
-library(tidyverse)
-library(DESeq2)
 
-# DEseq2 needs a specific package of 'locfit' that has to be installed first
-install.packages("https://cran.r-project.org/src/contrib/Archive/locfit/locfit_1.5-9.4.tar.gz", repos=NULL, type="source")
-# Now we can install DEseq2
-BiocManager::install("DESeq2")
+# Final re-installation of everything...
+
+# packageurl <- "https://github.com/tidyverse/tidyverse/archive/refs/tags/v1.3.1.tar.gz"
+# install.packages(packageurl, repos=NULL, type="source")
+# 
+# if (!requireNamespace("BiocManager", quietly = TRUE))
+# install.packages("BiocManager", version = '3.10')
+# 
+# BiocManager::install("GenomicRanges",dependencies = TRUE, INSTALL_opts = '--no-lock')
+# 
+# install.packages("https://cran.r-project.org/src/contrib/Archive/locfit/locfit_1.5-9.4.tar.gz", repos=NULL, type="source")
+# install.packages("https://cran.r-project.org/src/contrib/Archive/latticeExtra/latticeExtra_0.6-29.tar.gz", repos=NULL, type="source")
+# install.packages("https://cran.r-project.org/src/contrib/Archive/Hmisc/Hmisc_3.6-0.tar.gz", repos=NULL, type="source")
+# 
+# BiocManager::install("DESeq2")
+
 
 # now load the package
+library(tidyverse)
+library(GenomicRanges)
 library(DESeq2)
 
 ```
@@ -73,7 +85,7 @@ USe the terminal to "cp" the folder to the current working directory:
 ```{r import sample sheet}
 
 # First let's read in th sample sheet we made in 00_NF_core_pipeline
-samplesheet <- read_csv("results/samplesheet.csv")
+samplesheet <- read_csv("../00_RNAseq_download_NF_core_pipeline/00_NF_CORE_RNAseq_Pipeline_run/samplesheet.csv")
 
 # First changing the total sample to homo_sapiens_insoluble_fraction
 samplesheet[which(samplesheet$sample_name == "homo_sapiens_hepg2_R1"), "condition"] <- "homo_sapiens_insoluble_cytoplasmic_fraction"
@@ -101,6 +113,10 @@ samplesheet[which(samplesheet$sample_name == "homo_sapiens_hepg2_insoluble_cytop
 
 # saving this to sample_sheets folder
 write.csv(samplesheet, "results/corrected_samplesheet.csv")
+
+samplesheet <- read_csv("results/corrected_samplesheet.csv")
+
+
 
 ```
 

@@ -12,9 +12,9 @@ knitr::opts_chunk$set(echo = TRUE)
 options(stringsAsFactors = F)
 library(tidyverse)
 library(GenomicRanges)
-source("../../../../util/intersect_functions.R")
-source("../../../../util/_setup.R")
-library(ggpubr)
+source("../../../util/intersect_functions.R")
+source("../../../util/_setup.R")
+#library(ggpubr)
 ```
 
 Today we are going to be comparing how binding relates to expression output.
@@ -86,7 +86,7 @@ tpm <- salmon_tpm %>%
   # taking the mean by using summarize function (this is the mean of 2 res in each condition)
   summarize(tpm = mean(tpm, na.rm = T)) %>%
   pivot_wider(names_from = condition, values_from = tpm, names_prefix = "tpm_")
-  merge(samplesheet) %>%
+  #merge(samplesheet) %>%
   
   # bringing the table back to "normal" with pivot wider
   # the condition will be come the cols with names_from = with a prefix tpm_condition name
@@ -103,7 +103,7 @@ how many DBPs are bound at each promoter
 ```{r loading in peak features data frame }
 
 # peak_occurence_df is loaded in our environment and contains how many DBPs bind to each promoter (rows)
-peak_occurence_df <- read_csv("../01_peak_features/results/num_peaks_df.csv")
+peak_occurence_df <- read_csv("../01_peak_features/results/peak_occurence_df.csv")
 View(peak_occurence_df)
 
 # Now we can merge in the TPM data to this data.frame
