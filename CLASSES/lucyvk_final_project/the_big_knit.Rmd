@@ -2,7 +2,7 @@
 title: "Lucy_VK_Final_Project"
 author: "lucyvk"
 date: "5/1/2023"
-output: html_document
+output: github_document
 ---
 ```
 
@@ -30,7 +30,6 @@ First, we need to load some features of the genome that we will use in our analy
 (Note that the below code this is commented out and the final objects are loaded later)
 ```{r loading genome features}
 
-print("continue")
 # gencode_gr <- rtracklayer::import("/scratch/Shares/rinnclass/CLASS_2023/data/data/genomes/gencode.v32.annotation.gtf")
 # 
 # # gencode genes
@@ -63,7 +62,6 @@ We can next create a promoter peak occurrence matrix -  a matrix where promoters
 (Note that the below code this is commented out and the final objects are loaded later)
 ```{r creating consensus peaks}
 
-print("continue")
 # using import peaks to import .broadPeak files (~10min)
 # peak_list <- import_peaks(consensus_file_path = broadpeakfilepath)
 # # Creating unique DBP object for create_consensus_peaks_from_reduced
@@ -154,8 +152,6 @@ We can also download TF information and merge this in:
 
 (Note that the below code this is commented out and the final objects are loaded later)
 ```{r annotation with TF information}
-
-print("continue")
 
 # # download TF annotations to results
 # url <- "https://www.cell.com/cms/10.1016/j.cell.2018.01.029/attachment/ede37821-fd6f-41b7-9a0e-9d5410855ae6/mmc2.xlsx"
@@ -352,7 +348,7 @@ dev.off()
 We see that there are 5 or six big clusters. In particular, we can look at the locations of some of the ZNF proteins with unknown function. For example, we see ZNF644 clustered in it's own little group with FOXP1 -- maybe they have similar function, so maybe ZNF644 is also involved in transcription regulation. 
 
 We can also look at a GGDENRO version of this clustering:
-```{r ggdenro plot}
+```{r ggdenro plot, results="hide"}
 ggdendro::ggdendrogram(bin_hier, rotate = FALSE,  size = 3, 
                      theme_dendro = TRUE) +
  coord_flip() +
@@ -381,7 +377,7 @@ ggsave("analysis/02_clustering/figures/ggdendro_plot.pdf", height = 50, width = 
 Now, let's compare the clustering on lncRNA and mRNA promoters separately
 
 First the lncRNA:
-```{r clustering on gene types separately}
+```{r clustering on gene types separately, results="hide"}
 
 lncrna_promoters <- lncrna_mrna_promoters[lncrna_mrna_promoters$gene_type == "lncRNA"]
 
@@ -414,7 +410,7 @@ ggsave("analysis/02_clustering/figures/lncrna_hclust_binary_dist.pdf",height = 5
 Result: There appears to be some similarity (e.g. looking at the placement of POLR2A / POLR2AphosphoS2 and FOXA2 / FOXA1), however generally it looks like more of the proteins are in less distinct groups, like maybe the lncRNA promoter binding profiles are more similar across the board.
 
 Now the mRNA:
-```{r mRNA clustering}
+```{r mRNA clustering, results="hide"}
 
 mrna_promoters <- lncrna_mrna_promoters[lncrna_mrna_promoters$gene_type == "protein_coding"]
 
@@ -459,7 +455,7 @@ non_super_promoters <- lncrna_mrna_promoters[lncrna_mrna_promoters$gene_id %in% 
 ```
 First, let's do the comparison between mRNA and lncRNA. Running profile_tss takes a long time, so it's commented out below, and the data is loaded.
 
-```{r mRNA vs lncRNA metaplot}
+```{r mRNA vs lncRNA metaplot, results="hide"}
 
 #setting up lncrna df
 #lncrna_metaplot_df <- data.frame(x = integer(), dens = numeric(), dbp = character())
@@ -520,7 +516,7 @@ ggsave("analysis/03_metaplots/figures/mega_meta_plot_lncRNA-mRNA.pdf", width = 4
 Results: A handful of metaplots look different between lncRNA and mRNA promoters including H3K36me3, ZNF460, H3K4me2 but most look the same.
 
 Next, we can do metaplot comparison between super promoters and non super promoters:
-```{r metaplots super vs. non super promoters}
+```{r metaplots super vs. non super promoters, results = "hide"}
 
 #setting up lncrna df
 #super_metaplot_df <- data.frame(x = integer(), dens = numeric(), dbp = character())
@@ -605,7 +601,7 @@ write.csv(promoter_features_df, "analysis/04_rnaseq/results/promoter_features_df
 ```
 
 We can create a heatmap to look at the abundance of genes in each cellular fraction:
-```{r heatmap}
+```{r heatmap, results="hide"}
 
 tpm_matrix <- tpm %>% 
   column_to_rownames("gene_id") %>%
